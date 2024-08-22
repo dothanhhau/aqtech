@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "classValidatorShim": false,
+          "introspectComments": true,
+          "dtoFileNameSuffix": [".dto.ts", ".entity.ts", ".response.ts", "interfaces.ts"]
+        }
+      },
+      {
+        "name": "@automapper/classes/transformer-plugin",
+        "options": {
+          "modelFileNameSuffix": [".dto.ts", ".entity.ts", ".response.ts"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receipt Table</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      box-sizing: border-box;
+      font-size: 9px;
+      line-height: 13px;
+    }
+
+    .app {
+      width: 485px;
+      margin: auto;
+    }
+
+    .table_parent,
+    .table_child {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    .table_parent>tr>td {
+      padding: 4px;
+      width: 50%;
+      vertical-align: top;
+    }
+
+    .center {
+      text-align: center;
+      width: 50%;
+    }
+
+    .const_width {
+      width: 15px !important;
+      vertical-align: top;
+    }
+    .white-space-pre {
+      white-space: pre-wrap; /* Hoặc pre để giữ nguyên khoảng trắng */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- Header Table -->
+    <table class="table_parent">
+      <tr style="vertical-align: top;">
+        <td style="vertical-align: top; width: 55%; line-height: 16px">
+          <table class="table_child" style="font-weight: bold; margin: 0;">
+            <tr>
+              <td style="width: 40px !important; vertical-align: top;">Đơn vị: </td>
+              <td>
+                <!-- <img src="{{office.avatar}}" width="12px" height="12px"> -->
+                {{office.name}}
+              </td>
+            </tr>
+          </table>
+          <table class="table_child" style="font-weight: bold; margin: 0;">
+            <tr>
+              <td style="width: 40px !important; vertical-align: top;">Địa chỉ: </td>
+              <td>{{office.address}}</td>
+            </tr>
+          </table>
+        </td>
+        <td class="center">
+          <!-- <strong>Mẫu số 06 - TT</strong><br>
+          (Ban hành theo Thông tư số <br>
+          133/2016/TT-BTC ngày 26/8/2016 của <br>
+          Bộ Tài chính) -->
+          {{{receipt.info1}}}
+        </td>
+      </tr>
+    </table>
+
+    <!-- Main Table -->
+    <table class="table_parent">
+      <tr>
+        <td class="center" colspan="2">
+          <strong>BIÊN LAI THU TIỀN</strong><br>
+          <i>Ngày {{date.day}} tháng {{date.month}} năm {{date.year}}.</i>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <table align="right"">
+            <tr>
+              <td style="text-align: right; padding-right: 2px;">Quyển số:</td>
+              <td>{{receipt.book_number}}</td>
+            </tr>
+            <tr>
+              <td style="text-align: right; padding-right: 2px;">Số:</td>
+              <td>{{receipt.number}}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="line-height: 16px;">
+          Họ và tên người nộp: <strong>{{parent.name}}</strong><br>
+          Địa chỉ: {{parent.address}}<br>
+          Nội dung thu: {{receipt.title}}<br>
+          Số tiền thu: <strong class="white-space-pre">{{{receipt.paid}}}</strong> (Viết bằng chữ): <strong>{{receipt.word_paid}}</strong>
+        </td>
+      </tr>
+      <tr style="height: 20px;"></tr>
+      <tr>
+        <td class="center">
+          <strong>Người nộp tiền</strong><br>
+          <i>(Ký, họ tên)</i>
+        </td>
+        <td class="center">
+          <strong>Người thu tiền</strong><br>
+          <i>(Ký, họ tên)</i>
+        </td>
+      </tr>
+      <tr>
+        <td class="no-border center" style="padding-top: 60px;">
+          <!-- {{parent.name}} -->
+        </td>
+      </tr>
+    </table>
+
+    
+    <!-- Footer Table -->
+    <!-- <table class="table_parent">
+      <tr style="vertical-align: top;">
+        <td style="width: 55%; line-height: 16px;">
+          <table class="table_child" style="font-weight: bold; margin: 0;">
+            <tr>
+              <td style="width: 32px !important; vertical-align: top;">Đơn vị:</td>
+              <td>{{office.name}}</td>
+            </tr>
+          </table>
+          <table class="table_child" style="font-weight: bold; margin: 0;">
+            <tr>
+              <td style="width: 35px !important; vertical-align: top;">Bộ phận:</td>
+              <td>{{office.department}}</td>
+            </tr>
+          </table>
+        </td>
+        <td class="center">
+          
+          {{{receipt.info2}}}
+        </td>
+      </tr>
+    </table> -->
+
+    <!-- <strong>Mẫu số 07 - TT</strong><br>
+          (Ban hành theo Thông tư số <br>
+          133/2016/TT-BTC ngày 26/8/2016 của <br>
+          Bộ Tài chính) -->
+  </div>
+</body>
+
+</html>

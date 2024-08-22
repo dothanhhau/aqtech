@@ -1,0 +1,183 @@
+<html data-editor-version='2' class='sg-campaigns' xmlns='http://www.w3.org/1999/xhtml'>
+
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1'>
+  <!--[if !mso]><!-->
+  <meta http-equiv='X-UA-Compatible' content='IE=Edge'>
+  <!--<![endif]-->
+  <!--[if (gte mso 9)|(IE)]>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:AllowPNG/>
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+      <![endif]-->
+  <!--[if (gte mso 9)|(IE)]>
+  <style type='text/css'>
+    body {width: 2200px;margin: 0 auto;}
+    table {border-collapse: collapse;}
+    table, td {mso-table-lspace: 0pt;mso-table-rspace: 0pt;}
+    img {-ms-interpolation-mode: bicubic;}
+  </style>
+<![endif]-->
+  <style type='text/css'>
+    * {
+      padding: 0;
+      margin: 0;
+      font-size: 9px !important;
+    }
+
+    body,
+    p,
+    div {
+      font-family: arial, helvetica, sans-serif;
+    }
+
+    body {
+      color: #000000;
+    }
+
+    .table_amount td {
+      border-right: 1px solid black;
+      padding: 4px 4px;
+    }
+
+    .table_amount tr {
+      height: 20px;
+      border-bottom: 1px dashed black;
+    }
+
+    .border_solid {
+      border: 1px solid black !important;
+
+    }
+
+    .text_right {
+      text-align: right !important;
+    }
+
+    .primary_color {
+      background-color: #f6b26b;
+    }
+
+    .second_color {
+      background-color: #8eb4df;
+    }
+
+    .app {
+      width: 700px !important;
+    }
+
+    @media (max-width:480px) {
+      .app {
+        width: 100% !important;
+      }
+
+      .mobile {
+        margin-top: 10px;
+      }
+    }
+
+    .content_header {
+      text-align: left;
+      margin: 0 0 10px 0;
+      line-height: 16px;
+    }
+  </style>
+  <!--user entered Head Start--><!--End Head user entered-->
+</head>
+
+<body>
+  <center class='wrapper' data-link-color='#1188E6'
+    data-body-style='font-size:12; font-family:arial,helvetica,sans-serif; color:#000000; background-color:#FFFFFF;'>
+    <div class='app' style='width: 700px;'>
+      <div class="content_header">
+        <p style="font-size:16px;">Kính gửi: <strong>{{student.parent_name}}</strong></p>
+        <p style="font-size:16px;">{{office.name}} xin gửi đến quý phụ huynh thông tin học phí như sau:</p>
+      </div>
+      <table class='table_amount'
+        style='border-collapse: collapse; border: 1px solid black; font-weight: bold; text-transform: uppercase; width: 100%;'>
+        <tr class='border_solid primary_color' style='text-align: center;'>
+          <td colspan='3' style='text-align: center;'>HỌC PHÍ THÁNG {{info_date.month}} TỪ NGÀY {{info_date.start}} - {{info_date.end}}</td>
+        </tr>
+        <tr class='border_solid primary_color'>
+          <td colspan='3' style='text-align: center; text-transform: none;'>Học Sinh: <span style='text-transform: uppercase;'>{{student.name}}</span> - Lớp: {{student.class}} - CĐ: {{student.cd}}</td>
+        </tr>
+        <tr class='border_solid second_color'>
+          <td class='text_left' style='text-align: center !important; width: 45%;'>{{student.code}}</td>
+          <td style='text-align: center !important; width: 27.5% !important;'>Ghi chú</td>
+          <td style='text-align: center !important; width: 27.5% !important;'>Số tiền</td>
+        </tr>
+        {{#each studentRevenues}}
+        <tr>
+          <td class='text_left'>{{this.name}}</td>
+          <td>
+            {{#if this.content}}
+            {{this.content}}
+            {{/if}}
+          </td>
+          <td class='text_right'>
+            {{#if this.money}}
+            {{this.money}}
+            {{else}}
+            0
+            {{/if}}
+          </td>
+        </tr>
+        {{/each}}
+        
+        {{#each studentExemptions}}
+        <tr>
+          <td class='text_left'>{{this.exemption_name}}</td>
+          <td>
+            {{#if this.exemption_content}}
+            {{this.exemption_content}}
+            {{/if}}
+          </td>
+          <td class='text_right'>
+            {{#if this.exemption_money}}
+            {{this.exemption_money}}
+            {{else}}
+            0
+            {{/if}}
+          </td>
+        </tr>
+        {{/each}}
+        
+        <tr class='border_solid primary_color'>
+          <td colspan='2' class='text_left'>CỘNG HỌC PHÍ THÁNG TỪ {{info_date.start}} - {{info_date.end}}</td>
+          <!-- <td></td> -->
+          <td class='text_right'>{{student.total_payable}}</td>
+        </tr>
+        <tr>
+          <td class='text_left'>ĐÃ NỘP</td>
+          <td></td>
+          <td class='text_right'>{{student.amount_paid}}</td>
+        </tr>
+        <tr class='border_solid primary_color'>
+          <td>CÒN THIẾU ĐẾN {{info_date.end}}</td>
+          <td></td>
+          <td class='text_right'>{{student.remaining_payable}}</td>
+        </tr>
+        <tr class='border_solid primary_color'>
+          <td colspan='2' class='text_left'>CÒN DƯ ĐẾN {{info_date.end}}</td>
+          <!-- <td></td> -->
+          <td class='text_right'>{{student.du}}</td>
+        </tr>
+        <tr class='border_solid primary_color'>
+          <td colspan='3' style='padding-top: 8px; padding-bottom: 8px;' class='text_left'>
+            TÊN TÀI KHOẢN: {{office.name}}<br>
+            
+            {{#each office.banks}}
+            {{this.name}} - {{this.address}}: SỐ TK: {{this.num_account}} <br>
+            {{/each}}
+            
+            NỘI DUNG: NỘP TIỀN HỌC PHÍ THÁNG {{info_date.month}}, HỌC SINH TÊN: {{student.name}}, LỚP: {{student.class}}. {{student.teacher}}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </center>
+</body>

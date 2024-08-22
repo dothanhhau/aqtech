@@ -1,0 +1,40 @@
+{
+  "apps": [
+    {
+      "name": "API_AQTech_dev",
+      "script": "./dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "API_AQTech_test",
+      "script": "./dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "testing"
+      }
+    },
+    {
+      "name": "API_AQTech_stag",
+      "script": "./dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "staging"
+      }
+    },
+    {
+      "name": "API_AQTech_prod",
+      "script": "./dist/main.js",
+      "instances": "max",
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "apps": [
+    {
+      "name": "API_AQTech_dev",
+      "script": "./dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "API_AQTech_test",
+      "script": "./dist/main.js",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "NODE_ENV": "testing"
+      }
+    }
+  ]
+}

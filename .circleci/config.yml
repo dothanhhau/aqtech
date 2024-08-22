@@ -1,0 +1,325 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.2.0
+  bun: ksylvest/bun@1.0.1
+
+workflows:
+  aqtech_backend:
+    jobs:
+      - prepare_dev:
+          filters:
+            branches:
+              only:
+                - develop
+      - execute_dev:
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - prepare_dev
+
+      - test_approval:
+          type: approval
+          requires:
+            - execute_dev
+      - execute_test:
+          requires:
+            - test_approval
+
+      - prepare_stag:
+          filters:
+            branches:
+              only:
+                - staging
+      - stag_approval:
+          type: approval
+          requires:
+            - prepare_stag
+      - execute_stag:
+          requires:
+            - stag_approval
+
+      - prepare_prod:
+          filters:
+            branches:
+              only:
+                - product
+      - prod_approval:
+          type: approval
+          requires:
+            - prepare_prod
+      - execute_prod:
+          requires:
+            - prod_approval
+
+jobs:
+  prepare_dev:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      PM2C_SERV: pm2-circleci
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    working_directory: ~/be-project/
+    steps:
+      - checkout
+      - node/install:
+          node-version: '20.11.0'
+      - run:
+          name: Setup workspace
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            echo $(pwd)
+            source /home/circleci/.bashrc
+
+            oldpks=${WORK_DIR}/package.json;
+            newpks=package.json;
+
+            if cmp -s ${oldpks} ${newpks} ; then
+              echo 'Loading existing package.json'
+              sudo mv ${WORK_DIR}/node_modules ./
+            else
+              echo 'Init from package.json'
+              npm install
+            fi;
+
+            # Build that
+            npm run build
+
+            # Remove old workspace then init new workspace
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+            shopt -s dotglob
+            sudo mv * $WORK_DIR
+
+            # Indicates pm2 service startup
+            srvstat=`systemctl is-enabled $PM2C_SERV`
+            if [ $srvstat = "enabled" ]
+            then
+                echo "$PM2C_SERV is auto startup"
+
+            else
+                echo "$PM2C_SERV not auto startup, setup now!"
+                pm2 startup
+                sudo env PATH=$PATH:/home/circleci/.nvm/versions/node/v20.11.0/bin /home/circleci/.nvm/versions/node/v20.11.0/lib/node_modules/pm2/bin/pm2 startup systemd -u circleci --hp /home/circleci
+            fi            
+
+  execute_dev:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_dev
+      OLD_WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    steps:
+      - node/install:
+          node-version: '20.11.0'
+      - run:
+          name: Deploying to development
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            # Remove old workspace if exist
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+
+            # Push new source
+            cd $OLD_WORK_DIR
+            shopt -s dotglob
+            rsync -a * $WORK_DIR
+
+            # Start application
+            cd $WORK_DIR
+            pm2 restart ecosystem.json --only aqtech_dev
+            pm2 save            
+
+  execute_test:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_test
+      OLD_WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    steps:
+      - node/install:
+        node-version: '20.11.0'
+      - run:
+          name: Deploying to testing
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            # Remove old workspace if exist
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+
+            # Push new source
+            cd $OLD_WORK_DIR
+            shopt -s dotglob
+            rsync -a * $WORK_DIR
+
+            # Start application
+            cd $WORK_DIR
+            pm2 restart ecosystem.json --only aqtech_test
+            pm2 save            
+
+  prepare_stag:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      PM2C_SERV: pm2-circleci
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    working_directory: ~/be-project/
+    steps:
+      - checkout
+      - node/install:
+          node-version: '20.11.0'
+      - run:
+          name: Setup workspace
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            oldpks=${WORK_DIR}/package.json;
+            newpks=package.json;
+
+            if cmp -s ${oldpks} ${newpks} ; then
+              echo 'Loading existing package.json'
+              sudo mv ${WORK_DIR}/node_modules ./
+            else
+              echo 'Init from package.json'              
+              npm install
+            fi;
+
+            # Build that
+            npm run build
+
+            # Remove old workspace then init new workspace
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+            shopt -s dotglob
+            sudo mv * $WORK_DIR
+
+            # Indicates pm2 service startup
+            srvstat=`systemctl is-enabled $PM2C_SERV`
+            if [ $srvstat = "enabled" ]
+            then
+                echo "$PM2C_SERV is auto startup"
+            else
+                echo "$PM2C_SERV not auto startup, setup now!"
+                pm2 startup
+                sudo env PATH=$PATH:/home/circleci/.nvm/versions/node/v20.11.0/bin /home/circleci/.nvm/versions/node/v20.11.0/lib/node_modules/pm2/bin/pm2 startup systemd -u circleci --hp /home/circleci
+            fi            
+
+  execute_stag:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_stag
+      OLD_WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    steps:
+      - node/install:
+        node-version: '20.11.0'
+      - run:
+          name: Deploying to staging
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            # Remove old workspace if exist
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+
+            # Push new source
+            cd $OLD_WORK_DIR
+            shopt -s dotglob
+            rsync -a * $WORK_DIR
+
+            # Start application
+            cd $WORK_DIR
+            pm2 restart ecosystem.json --only aqtech_stag
+            pm2 save     
+
+  prepare_prod:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      PM2C_SERV: pm2-circleci
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    working_directory: ~/be-project/
+    steps:
+      - checkout
+      - node/install:
+          node-version: '20.11.0'
+      - run:
+          name: Setup workspace
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            oldpks=${WORK_DIR}/package.json;
+            newpks=package.json;
+
+            if cmp -s ${oldpks} ${newpks} ; then
+              echo 'Loading existing package.json'
+              sudo mv ${WORK_DIR}/node_modules ./
+            else
+              echo 'Init from package.json'              
+              npm install
+            fi;
+
+            # Build that
+            npm run build
+
+            # Remove old workspace then init new workspace
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+            shopt -s dotglob
+            sudo mv * $WORK_DIR
+
+            # Indicates pm2 service startup
+            srvstat=`systemctl is-enabled $PM2C_SERV`
+            if [ $srvstat = "enabled" ]
+            then
+                echo "$PM2C_SERV is auto startup"
+            else
+                echo "$PM2C_SERV not auto startup, setup now!"
+                pm2 startup
+                sudo env PATH=$PATH:/home/circleci/.nvm/versions/node/v20.11.0/bin /home/circleci/.nvm/versions/node/v20.11.0/lib/node_modules/pm2/bin/pm2 startup systemd -u circleci --hp /home/circleci
+            fi            
+
+  execute_prod:
+    machine: true
+    resource_class: alphatechz/runner_aqtech
+    environment:
+      WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_prod
+      OLD_WORK_DIR: /home/circleci/aqtech-api_<< pipeline.git.branch >>_pre
+    steps:
+      - node/install:
+        node-version: '20.11.0'
+      - run:
+          name: Deploying to product
+          shell: /bin/bash
+          command: |
+            echo "Node version: $(node -v)"
+            source /home/circleci/.bashrc
+
+            # Remove old workspace if exist
+            if [ -d "${WORK_DIR}" ]; then sudo rm -Rf ${WORK_DIR}; fi
+            mkdir $WORK_DIR
+
+            # Push new source
+            cd $OLD_WORK_DIR
+            shopt -s dotglob
+            rsync -a * $WORK_DIR
+
+            # Start application
+            cd $WORK_DIR
+            pm2 restart ecosystem.json --only aqtech_prod
+            pm2 save     
